@@ -44,34 +44,6 @@ Start by using the `Run Extension` script in **Run & Debung** (Crtl+Shift+D) in 
 
 - You can use apache zookeeper for testing purposes : [https://github.com/apache/zookeeper](https://github.com/apache/zookeeper)
 
-## Error handling
-
-if you get an error while building the backend for install_R.sh not found, you can just replace a section of `/service_model_creation/Dockerfile` :
-From this 
-```
-# Install R
-WORKDIR /r_install
-COPY ./service_model_creation/install_R.sh /r_install
-RUN chmod a+x /r_install/install_R.sh
-RUN /r_install/install_R.sh
-```
-TO
-```
-# Install R
-WORKDIR /r_install
-RUN apt update -qq
-RUN apt install --no-install-recommends -y software-properties-common dirmngr
-RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
-RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-RUN apt install --no-install-recommends -y r-base
-```
-
-if you get this error while building the backend, you can:
-```
-Error response from daemon: error while mounting volume '/var/lib/docker/volumes/services_training_data/_data': failed to mount local volume: mount
-```
-Just create a a new folder **training_data** log-density-plugin/service/training_data
-
 ## Testing
 To run the unit and integration tests:
 1. Change directory to services/service_ai_analysis or services/service_model_creation.
