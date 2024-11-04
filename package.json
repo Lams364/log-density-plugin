@@ -6,6 +6,8 @@
   ],
   "scripts": {
     "start":"code --extensionDevelopmentPath=%CD%/logdensitytool",
-    "build-service-density":"docker-compose -f /service/docker-compose.yml up --build"
+    "test-ai-analysis":"pytest services/service_ai_analysis",
+    "test-model-creation":"pytest services/service_model_creation",
+    "build-service-density":"docker-compose -f ./services/docker-compose.yml up --build"
   }
 }
