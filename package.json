@@ -1,0 +1,11 @@
+{
+  "name": "ai-box",
+  "version": "0.1.0",
+  "workspaces": [
+    "logdensitytool"
+  ],
+  "scripts": {
+    "start":"code --extensionDevelopmentPath=%CD%/logdensitytool",
+    "build-service-density":"docker-compose -f /service/docker-compose.yml up --build"
+  }
+}
