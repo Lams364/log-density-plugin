@@ -51,17 +51,51 @@ async function generateLogAdvice() {
         return;
     }
 
-    const selectedText = editor.document.getText(editor.selection);
-    if (!selectedText) {
-        vscode.window.showInformationMessage("Please select some code.");
-        return;
+    const selection = editor.selection;
+    let selectedText = editor.document.getText(selection);
+
+    // Function to find the whole method surrounding the cursor
+    function getSurroundingMethodText(lineNumber) {
+        let startLine = lineNumber;
+        let endLine = lineNumber;
+        const document = editor.document;
+
+        // Find the start of the method by looking upwards for the function declaration
+        while (startLine > 0 && !document.lineAt(startLine).text.trim().endsWith("{")) {
+            startLine--;
+        }
+
+        // Find the end of the method by looking downwards for the closing bracket
+        while (endLine < document.lineCount - 1 && !document.lineAt(endLine).text.trim().endsWith("}")) {
+            endLine++;
+        }
+
+        // Capture the full method text
+        const methodRange = new vscode.Range(startLine, 0, endLine, document.lineAt(endLine).text.length);
+        return document.getText(methodRange);
     }
 
-    const prompt = (
-        "Context: You are an AI assistant that helps people with their questions. "
-        + "Please only add 2 to 5 lines of code to improve log messages to the following code: "
-        + selectedText
-    );
+    // Determine if the user has selected text or is just on a single line
+    let prompt;
+    if (!selectedText) {
+        // No selection - user wants a single log line on the current line
+        const line = editor.document.lineAt(selection.active.line);
+        selectedText = getSurroundingMethodText(line.lineNumber);
+
+        // Send the full method to the AI but only ask for a single log line at the specific line
+        prompt = (
+            "Context: You are an AI assistant helping a developer"
+            + "Your task is to add one line of code to improve the log message at the empty line. Do not change the code or add methods. Only output one print statement. Here is the code: "
+            + selectedText
+        );
+    } else {
+        // User has selected text, likely a method - generate multiple log lines
+        prompt = (
+            "Context: You are an AI assistant that helps people with their questions. "
+            + "Please only add 2 to 5 lines of code to improve log messages to the following code: "
+            + selectedText
+        );
+    }
 
     // Show loading progress window while waiting for the response
     vscode.window.withProgress({
@@ -74,12 +108,9 @@ async function generateLogAdvice() {
         try {
             console.log("Calling the LLM model to get code suggestion with the selected text: ", selectedText);
             
-			// Call your LLM service
-			const response = await callGenerationBackendPost('/predict', {prompt: prompt, max_new_tokens: 100, temperature: 0.1}) 
-            
-
-            console.log("Response from LLM model: ");
-			console.log(JSON.stringify(response.data, null, 2))
+            // Call your LLM service
+            const response = await callGenerationBackendPost('/predict', { prompt: prompt, max_new_tokens: 100, temperature: 0.1 });
+            console.log(response.data.content);
             const suggestedCode = response.data.content;
 
             // Create a text edit with the generated code
