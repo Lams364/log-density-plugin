@@ -51,100 +51,78 @@ async function generateLogAdvice() {
         return;
     }
 
+    const document = editor.document;
     const selection = editor.selection;
-    let selectedText = editor.document.getText(selection);
+    const cursorLine = selection.active.line; // Ligne actuelle du curseur
 
-    // Function to find the whole method surrounding the cursor
+    // Fonction pour extraire la méthode autour d'une ligne spécifique
     function getSurroundingMethodText(lineNumber) {
         let startLine = lineNumber;
         let endLine = lineNumber;
-        const document = editor.document;
 
-        // Find the start of the method by looking upwards for the function declaration
+        // Chercher le début de la méthode
         while (startLine > 0 && !document.lineAt(startLine).text.trim().endsWith("{")) {
             startLine--;
         }
 
-        // Find the end of the method by looking downwards for the closing bracket
+        // Chercher la fin de la méthode
         while (endLine < document.lineCount - 1 && !document.lineAt(endLine).text.trim().endsWith("}")) {
             endLine++;
         }
 
-        // Capture the full method text
+        // Récupérer le texte de la méthode complète
         const methodRange = new vscode.Range(startLine, 0, endLine, document.lineAt(endLine).text.length);
         return document.getText(methodRange);
     }
 
-    // Determine if the user has selected text or is just on a single line
-    let prompt;
-    if (!selectedText) {
-        // No selection - user wants a single log line on the current line
-        const line = editor.document.lineAt(selection.active.line);
-        selectedText = getSurroundingMethodText(line.lineNumber);
+    const surroundingMethod = getSurroundingMethodText(cursorLine);
 
-        // Send the full method to the AI but only ask for a single log line at the specific line
-        prompt = (
-            "Context: You are an AI assistant helping a developer"
-            + "Your task is to add one line of code to improve the log message at the empty line. Do not change the code or add methods. Only output one print statement. Here is the code: "
-            + selectedText
-        );
-    } else {
-        // User has selected text, likely a method - generate multiple log lines
-        prompt = (
-            "Context: You are an AI assistant that helps people with their questions. "
-            + "Please only add 2 to 5 lines of code to improve log messages to the following code: "
-            + selectedText
-        );
-    }
+    // Générer un prompt spécifique pour le modèle
+    const prompt = (
+        "Context: You are an AI assistant helping a developer improve their logging. "
+        + `Here is the Java method:\n\n${surroundingMethod}\n\n`
+        + `Add a single log statement at line ${cursorLine} to enhance observability. `
+        + "Focus on key variables or significant events at this point in the code."
+    );
 
-    // Show loading progress window while waiting for the response
-    vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: "Generating Log Advice",
-        cancellable: false
-    }, async (progress) => {
-        progress.report({ message: "Contacting LLM..." });
+    // Progress window
+    vscode.window.withProgress(
+        {
+            location: vscode.ProgressLocation.Notification,
+            title: "Generating Log Advice",
+            cancellable: false
+        },
+        async (progress) => {
+            progress.report({ message: "Contacting LLM..." });
 
-        try {
-            console.log("Calling the LLM model to get code suggestion with the selected text: ", selectedText);
-            
-            // Call your LLM service
-            const response = await callGenerationBackendPost('/predict', { prompt: prompt, max_new_tokens: 100, temperature: 0.1 });
-            console.log(response.data.content);
-            const suggestedCode = response.data.content;
+            try {
+                console.log("Calling the LLM model with the following prompt:", prompt);
 
-            // Create a text edit with the generated code
-            const edit = new vscode.WorkspaceEdit();
-            const range = new vscode.Range(editor.selection.start, editor.selection.end);
-            edit.replace(editor.document.uri, range, suggestedCode);
-
-            // Apply the edit as a preview
-            await vscode.workspace.applyEdit(edit);
-
-            // Prompt the user to accept or decline the changes
-            const userResponse = await vscode.window.showInformationMessage(
-                "Log advice generated. Do you want to apply the changes?",
-                "Yes",
-                "No"
-            );
-
-            if (userResponse === "Yes") {
-                // Apply the changes permanently
-                await editor.edit(editBuilder => {
-                    editBuilder.replace(editor.selection, suggestedCode);
+                // Appeler le backend pour obtenir une suggestion
+                const response = await callGenerationBackendPost('/predict', {
+                    prompt: prompt,
+                    max_new_tokens: 50,
+                    temperature: 0.1
                 });
-                vscode.window.showInformationMessage("Log advice applied.");
-            } else {
-                // Revert the changes
-                vscode.commands.executeCommand('undo');
-                vscode.window.showInformationMessage("Log advice discarded.");
+
+                const suggestedLog = response.data.content.trim();
+                console.log("Generated log suggestion:", suggestedLog);
+
+                // Insérer la ligne de log à la position donnée
+                await editor.edit(editBuilder => {
+                    const position = new vscode.Position(cursorLine + 1, 0);
+                    editBuilder.insert(position, `\n${suggestedLog}\n`);
+                });
+
+                vscode.window.showInformationMessage("Log advice successfully generated and inserted.");
+            } catch (error) {
+                console.error(error);
+                vscode.window.showErrorMessage("Failed to generate log advice.");
             }
-        } catch (error) {
-            console.error(error);
-            vscode.window.showErrorMessage("Failed to get code suggestion.");
         }
-    });
+    );
 }
+
 
 function activate(context) {
     const workspaceRoot = vscode.workspace.rootPath;
