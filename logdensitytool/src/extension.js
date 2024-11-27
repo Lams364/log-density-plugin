@@ -73,6 +73,12 @@ async function generateLogAdvice() {
     }, async (progress) => {
         progress.report({ message: "Contacting LLM..." });
 
+        const userResponse = await vscode.window.showInformationMessage(
+            "Log advice generated. Do you want to apply the changes?",
+            "Yes",
+            "No"
+        );
+
         try {
             console.log("Calling the LLM model to get code suggestion with the selected text: ", selectedText);
             
@@ -96,11 +102,16 @@ async function generateLogAdvice() {
                 console.log("Generated log suggestion:", suggestedLog);
 
                 // Insérer la ligne de log à la position donnée
-                await editor.edit(editBuilder => {
-                    const position = new vscode.Position(cursorLine + 1, 0);
-                    editBuilder.insert(position, `\n${suggestedLog}\n`);
-                });
-
+                if(userResponse === "Yes") {
+                    await editor.edit(editBuilder => {
+                        const position = new vscode.Position(cursorLine + 1, 0);
+                        editBuilder.insert(position, `\n${suggestedLog}\n`);
+                    });
+                } else {
+                    // Revert the changes
+                    vscode.commands.executeCommand('undo');
+                    vscode.window.showInformationMessage("Log advice discarded.");
+                }
                 vscode.window.showInformationMessage("Log advice successfully generated and inserted.");
             } catch (error) {
                 console.error(error);
