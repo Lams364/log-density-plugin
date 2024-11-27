@@ -33,17 +33,6 @@ services:
       - "11434:11434"
     command: ["serve"]
 
-  init:
-    image: ollama/ollama
-    container_name: ollama-init
-    depends_on:
-      - ollama  # Ensure Ollama is up first
-    volumes:
-      - ollama:/root/.ollama
-    entrypoint: ["/bin/bash", "-c"]
-    command: |
-      "./post-start.sh"  # Run the post-start script
-
 volumes:
   ollama:  # Properly define the named volume here
     driver: local

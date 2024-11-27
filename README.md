@@ -22,10 +22,14 @@ The Log Density Analyzer is a Visual Studio Code extension that leverages an AI 
 1. Open terminal in project root
 2. Run this command :
 
-```bash
-docker-compose -f ./services/docker-compose.yml up --build
-```
-3 services vont démarré
+   ```bash
+   docker-compose -f ./services/docker-compose.yml up --build
+   ```
+
+3. Des services vont démarrés
+   - services-training
+   - services-model_runner
+   - ollama
 
 ## Setting Up the Frontend
 
