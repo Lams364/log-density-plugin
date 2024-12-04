@@ -1,10 +1,10 @@
 // Abstract Base Class
-class ApiModelService {
+class ApiModel {
 
-  apiName
+  static apiId
 
   constructor(url, port, systemPrompt, initialModel, initialToke) {
-    if (new.target === ApiModelService) {
+    if (new.target === ApiModel) {
       throw new Error("Cannot instantiate abstract class ApiModelService directly.");
     }
     this.url = url;
@@ -23,11 +23,11 @@ class ApiModelService {
   }
 
   async info() {
-    throw new Error("Method 'modelInfo()' must be implemented.");
+    throw new Error("Method 'info()' must be implemented.");
   }
 
   async getModel() {
-    throw new Error("Method 'modelInfo()' must be implemented.");
+    throw new Error("Method 'getModel()' must be implemented.");
   }
 
   async changeToken(token) {
@@ -35,4 +35,4 @@ class ApiModelService {
   }
 }
 
-module.exports = ApiModelService;
+module.exports = ApiModel;

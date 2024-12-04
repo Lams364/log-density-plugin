@@ -1,9 +1,9 @@
-const { Post, Get } = require('../utils/api');
-const ApiModelService = require('../interface/ApiModelService');
+const { Post, Get } = require('../../utils/api');
+const ApiModel = require('./apiModel');
 
-class HfApiModelService extends ApiModelService{
+class HfApiModel extends ApiModel {
 
-  apiName = "huggingface"
+  static apiId = "huggingface"
 
   constructor(url, port, systemPrompt, initialModel, initialToken) {
     super(url, port, systemPrompt, initialModel, initialToken);
@@ -46,8 +46,8 @@ class HfApiModelService extends ApiModelService{
   }
   
   /**
-   * Retrieves information about the current model or API.
-   * @returns {model: string} Model configured
+   * Retrieves information about the models loaded.
+   * @returns {model: string|list} list of models or string
    */
   async info() {
     const response = await Get(this.url, this.port, '/model_info', null)
@@ -93,4 +93,4 @@ class HfApiModelService extends ApiModelService{
   }
 }
 
-module.exports = HfApiModelService;
+module.exports = HfApiModel;

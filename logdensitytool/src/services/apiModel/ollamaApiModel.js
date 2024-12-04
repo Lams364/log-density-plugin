@@ -1,13 +1,14 @@
-const { Post, Get } = require('../utils/api');
-const ApiModelService = require('../interface/ApiModelService');
+const { Post, Get } = require('../../utils/api');
+const ApiModel = require('./apiModel');
+const CircularJSON = require('circular-json');
 
 /**
  * Ollama API DOC : https://github.com/ollama/ollama/blob/main/docs/api.md
  */
 
-class OllamaApiModelService extends ApiModelService{
+class OllamaApiModel extends ApiModel{
 
-  apiName = "ollama"
+  static apiId = "ollama"
 
   constructor(url, port, systemPrompt, initialModel, initialToken) {
     super(url, port, systemPrompt, initialModel, initialToken);
@@ -68,12 +69,13 @@ class OllamaApiModelService extends ApiModelService{
   }
   
   /**
-   * Retrieves information about the current model or API.
-   * @returns {model: string} Model configured
+   * Retrieves information about the models loaded.
+   * @returns {model: string|list} list of models or string
    */
   async info() {
     const response = await Get(this.url, this.port, '/api/ps', null)
-    console.log(JSON.stringify(response, null, 2))
+    // !! Circular reference in response, use next line to log
+    //console.log(CircularJSON.stringify(response))
     if (response.data.models.length > 0) {
       let model_list = [];
 
@@ -135,4 +137,4 @@ class OllamaApiModelService extends ApiModelService{
   }
 }
 
-module.exports = OllamaApiModelService;
+module.exports = OllamaApiModel;
