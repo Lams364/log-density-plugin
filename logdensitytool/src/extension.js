@@ -5,9 +5,9 @@ const LogDensityCodeLensProvider = require('./providers/logDensityCodeLensProvid
 const { registerOpenTabsSideBarProvider, OpenTabsSidebarProvider } = require('./providers/openTabsSidebarProvider');
 const { trainModel } = require('./services/trainModelService');
 const { runModel } = require('./services/runModelService');
-const { registerJavaFileProvider, JavaFileProvider } = require('./providers/javaFileProvider');  
-const { registerAnalyzeFileProvider} = require('./providers/analyzeFileProvider');
-const { createApiModel , createResponse } = require('./services/factory');
+const { registerJavaFileProvider, JavaFileProvider } = require('./providers/javaFileProvider');
+const { registerAnalyzeFileProvider } = require('./providers/analyzeFileProvider');
+const { createApiModel, createResponse } = require('./services/factory');
 const { configuration } = require('./model_config');
 const { api_id, url, port, system_prompt, default_model, default_token, response_id } = configuration;
 
@@ -40,7 +40,7 @@ async function generateLogAdvice() {
     if (!selection.isEmpty) {
         // L'utilisateur a sélectionné du texte (méthode)
         selectedText = document.getText(selection);
-    } 
+    }
 
     // Fonction pour extraire la méthode autour d'une ligne spécifique
     function getSurroundingMethodText(lineNumber) {
@@ -66,7 +66,7 @@ async function generateLogAdvice() {
 
     // Générer un prompt spécifique pour le modèle
     const prompt = (
-    // Promt modifiable dans le backend dans un fichier config
+        // Promt modifiable dans le backend dans un fichier config
         "Context: Suggest 1 log (System.out.println()) to add to method the following JAVA functions, don't return the input, only the output: \n"
         //+ "Please only add 2 to 5 lines of code to improve log messages to the following code: "
         + selectedText
@@ -82,25 +82,25 @@ async function generateLogAdvice() {
 
         try {
             console.log("Calling the LLM model to get code suggestion with the selected text: ", selectedText);
-            
-			// Call your LLM service
+
+            // Call your LLM service
             const model = await apiModelService.getModel();
-			const modelResponse = await apiModelService.generate(model, null, prompt, null, null)
-            
+            const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
+
             console.log("Response from LLM model: ");
-            console.log(modelResponse)
+            console.log(modelResponse);
             let suggestedCode = modelResponse;
 
-            const tabSize = editor.options.tabSize || 4; // Default to 4 if tabSize is not set
-            const endPosition = editor.selection.end;
-            const column = endPosition.character;
-            const tabulation = Math.floor(column / tabSize);
+            const linesToInsert = reponseService.extractLines(suggestedCode, 0);
+            const cursorPosition = editor.selection.active;
+            const lineIndent = ' '.repeat(cursorPosition.character);
 
-
-            // Create a text edit with the generated code
             const edit = new vscode.WorkspaceEdit();
-            const range = new vscode.Range(editor.selection.start, editor.selection.end);
-            edit.replace(editor.document.uri, range, reponseService.adaptResponse(suggestedCode, tabulation));
+            for (let i = 0; i < linesToInsert.length; i++) {
+                let lineText = linesToInsert[i];
+                const formattedLine = i > 0 ? lineIndent + lineText : lineText;
+                edit.insert(document.uri, cursorPosition, formattedLine + "\n");
+            }
 
             // Apply the edit as a preview
             await vscode.workspace.applyEdit(edit);
@@ -137,7 +137,7 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('extension.showLogDensityInfo', block => {
         vscode.window.showInformationMessage(`Details for block starting at line ${block.blockLineStart}: ${JSON.stringify(block)}`);
     }));
- 
+
     // Register AnalyzeFileProvider and JavaFileProvider and OpenTabsSidebarProvider
     const openTabsSidebarProvider = registerOpenTabsSideBarProvider(context);
     const analyzeFileProvider = registerAnalyzeFileProvider(context);
@@ -189,7 +189,7 @@ function activate(context) {
         const allFiles = await getAllJavaFiles();
         const results = await analyzeProjectFiles(allFiles);
         if (results) {
-            console.log(results);  
+            console.log(results);
             vscode.window.showInformationMessage('New Java files analysis complete. Check the console for details.');
         }
     });
@@ -205,11 +205,11 @@ function activate(context) {
                 title: `Changing Model to: ${model}`,
                 cancellable: false
             }, async (progress) => {
-                progress.report({message: "Initializing model change..." });
-                
+                progress.report({ message: "Initializing model change..." });
+
                 try {
                     const response = await apiModelService.changeModel(model)
-                    
+
                     if (response.completed === true) {
                         vscode.window.showInformationMessage('Model Change has been successful, Model configured: ' + response.model);
                     } else {
@@ -223,26 +223,26 @@ function activate(context) {
             vscode.window.showErrorMessage('MODEL ID is required');
         }
     });
-    
+
 
     let changeToken = vscode.commands.registerCommand('log-advice-generator.changeToken', async () => {
         const token = await vscode.window.showInputBox({ prompt: `Enter ${api} Token` });
         if (token) {
             console.log(`Changing token`)
             const response = await apiModelService.changeToken(token);
-			console.log(JSON.stringify(response, null, 2));
+            console.log(JSON.stringify(response, null, 2));
             if (response.completed == true) {
                 vscode.window.showInformationMessage('Token Change has been successfull')
             } else {
-				vscode.window.showErrorMessage(response.message);
-			}
+                vscode.window.showErrorMessage(response.message);
+            }
         } else {
             vscode.window.showErrorMessage('TOKEN is required');
         }
     });
 
     let getModelInfo = vscode.commands.registerCommand('log-advice-generator.modelInfo', async () => {
-		const response = await apiModelService.info();
+        const response = await apiModelService.info();
         console.log(JSON.stringify(response.model, null))
         vscode.window.showInformationMessage("Model : " + JSON.stringify(response.model, null))
     });
@@ -258,7 +258,7 @@ function activate(context) {
     );
 }
 
-function deactivate() {}
+function deactivate() { }
 
 module.exports = {
     activate,
