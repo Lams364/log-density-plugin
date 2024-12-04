@@ -81,17 +81,15 @@ async function generateLogAdvice() {
         progress.report({ message: "Contacting LLM..." });
 
         try {
-            console.log("Calling the LLM model to get code suggestion with the selected text: ", selectedText);
-
             // Call your LLM service
             const model = await apiModelService.getModel();
-            const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
+            let linesToInsert = [];
+            while (linesToInsert.length === 0) {
+                console.log("Generating log advice...");
+                const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
+                linesToInsert = reponseService.extractLines(modelResponse, 0);
+            }
 
-            console.log("Response from LLM model: ");
-            console.log(modelResponse);
-            let suggestedCode = modelResponse;
-
-            const linesToInsert = reponseService.extractLines(suggestedCode, 0);
             let cursorPosition = editor.selection.active;
 
             // Detect indentation style based on the current line
@@ -107,14 +105,8 @@ async function generateLogAdvice() {
                 // Preserve the detected indentation for all lines after the first
                 const formattedLine = i > 0 ? detectedIndent + lineText : lineText;
 
-                console.log("Inserting line: ", formattedLine);
-                console.log("At position: ", cursorPosition);
-
                 // Insert the formatted line
                 edit.insert(document.uri, cursorPosition, formattedLine + '\n');
-
-                // Update cursor position to the start of the next line
-                // cursorPosition = cursorPosition.translate(1, 0); // Move to the next line
             }
 
             // Apply the edit
