@@ -36,31 +36,63 @@ async function generateLogAdvice() {
     const selection = editor.selection;
     const cursorLine = selection.active.line; // Ligne actuelle du curseur
 
+    let selectedText;
+
     if (!selection.isEmpty) {
         // L'utilisateur a sélectionné du texte (méthode)
         selectedText = document.getText(selection);
-    } 
+    } else {
+        // Fonction pour extraire la méthode autour d'une ligne spécifique
+        function getSurroundingMethodText(lineNumber) {
+            let startLine = lineNumber;
+            let endLine = lineNumber;
 
-    // Fonction pour extraire la méthode autour d'une ligne spécifique
-    function getSurroundingMethodText(lineNumber) {
-        let startLine = lineNumber;
-        let endLine = lineNumber;
+            // Compteur pour suivre les accolades
+            let openBraces = 0;
 
-        // Chercher le début de la méthode
-        while (startLine > 0 && !document.lineAt(startLine).text.trim().endsWith("{")) {
-            startLine--;
+            // Chercher le début de la méthode
+            while (startLine > 0) {
+                const lineText = document.lineAt(startLine).text.trim();
+
+                // Compter les accolades fermées et ouvertes
+                openBraces += (lineText.match(/\}/g) || []).length;
+                openBraces -= (lineText.match(/\{/g) || []).length;
+
+                if (openBraces < 0) {
+                    // Trouvé le début de la méthode
+                    break;
+                }
+
+                startLine--;
+            }
+
+            // Réinitialiser le compteur pour chercher la fin
+            openBraces = 0;
+
+            // Chercher la fin de la méthode
+            while (endLine < document.lineCount - 1) {
+                const lineText = document.lineAt(endLine).text.trim();
+
+                // Compter les accolades ouvertes et fermées
+                openBraces += (lineText.match(/\{/g) || []).length;
+                openBraces -= (lineText.match(/\}/g) || []).length;
+
+                if (openBraces === 0 && lineText.includes('}')) {
+                    // Trouvé la fin de la méthode
+                    break;
+                }
+
+                endLine++;
+            }
+
+            // Récupérer le texte de la méthode complète
+            const methodRange = new vscode.Range(startLine, 0, endLine, document.lineAt(endLine).text.length);
+            return document.getText(methodRange);
         }
 
-        // Chercher la fin de la méthode
-        while (endLine < document.lineCount - 1 && !document.lineAt(endLine).text.trim().endsWith("}")) {
-            endLine++;
-        }
-
-        // Récupérer le texte de la méthode complète
-        const methodRange = new vscode.Range(startLine, 0, endLine, document.lineAt(endLine).text.length);
-        return document.getText(methodRange);
     }
-
+    
+    // Récupérer la méthode entourant la ligne du curseur
     selectedText = getSurroundingMethodText(cursorLine);
 
     // Générer un prompt spécifique pour le modèle
