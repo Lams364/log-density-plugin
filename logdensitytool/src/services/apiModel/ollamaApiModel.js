@@ -114,6 +114,7 @@ class OllamaApiModel extends ApiModel{
    */
   async init(model, token) {
     this.changeModel(model);
+
   }
 
   async load(model) {

@@ -8,17 +8,17 @@ class RegexJavaResponse extends Response {
   }
 
   /**
-     * Extract log_statement and reason in model response and 
-     * build response
-     * @param {string} text Model response
-     * @param {int} tabluation tabulation in Code editor
-     * @returns {string} built response :
-     * 
-     *Ex:
-        reason\n
-        \t\tlog_statement
-     */
-  adaptResponse(text, tabluation) {
+   * Extract log_statement and reason in model response and 
+   * build response
+   * @param {string} text Model response
+   * @param {int} tabluation tabulation in Code editor
+   * @returns {string} built response :
+   * 
+   *Ex:
+      reason\n
+      \t\tlog_statement
+    */
+    extractLines(text) {
     return this.extractLog(text, tabluation);
   }
 

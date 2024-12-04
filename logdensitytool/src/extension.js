@@ -10,7 +10,7 @@ const { registerAnalyzeFileProvider } = require('./providers/analyzeFileProvider
 const { createApiModel, createResponse } = require('./services/factory');
 const { configuration } = require('./model_config');
 const { readFile } = require("./utils/fileReader");
-const { buildPrompt } = require("./utils/promptBuilder")
+const { buildPrompt, getSurroundingMethodText } = require("./utils/modelTools")
 const path = require('path');
 
 
@@ -47,55 +47,8 @@ async function generateLogAdvice() {
         selectedText = document.getText(selection);
     }
 
-    // Fonction pour extraire la méthode autour d'une ligne spécifique
-    function getSurroundingMethodText(lineNumber) {
-        let startLine = lineNumber;
-        let endLine = lineNumber;
-
-        // Compteur pour suivre les accolades
-        let openBraces = 0;
-
-        // Chercher le début de la méthode
-        while (startLine > 0) {
-            const lineText = document.lineAt(startLine).text.trim();
-
-            // Compter les accolades fermées et ouvertes
-            openBraces += (lineText.match(/\}/g) || []).length;
-            openBraces -= (lineText.match(/\{/g) || []).length;
-
-            if (openBraces < 0) {
-                // Trouvé le début de la méthode
-                break;
-            }
-
-            startLine--;
-        }
-
-        // Réinitialiser le compteur pour chercher la fin
-        openBraces = 0;
-
-        // Chercher la fin de la méthode
-        while (endLine < document.lineCount - 1) {
-            const lineText = document.lineAt(endLine).text.trim();
-
-            // Compter les accolades ouvertes et fermées
-            openBraces += (lineText.match(/\{/g) || []).length;
-            openBraces -= (lineText.match(/\}/g) || []).length;
-
-            if (openBraces === 0 && lineText.includes('}')) {
-                // Trouvé la fin de la méthode
-                break;
-            }
-
-            endLine++;
-        }
-
-        // Récupérer le texte de la méthode complète
-        const methodRange = new vscode.Range(startLine, 0, endLine, document.lineAt(endLine).text.length);
-        return document.getText(methodRange);
-    }
-
     selectedText = getSurroundingMethodText(cursorLine);
+    console.log(selectedText)
 
     // Générer un prompt spécifique pour le modèle
     let prompt = (
@@ -116,17 +69,20 @@ async function generateLogAdvice() {
         try {
             // Call your LLM service
             const model = await apiModelService.getModel();
+
+            // Get the current directory of the script
+            const projectBasePath = path.resolve(__dirname, "..", "..");
+            let system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
+            builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
+            console.log(builtPrompt)
+            if (builtPrompt != null) {
+                prompt = builtPrompt
+            }
+
             let linesToInsert = [];
             while (linesToInsert.length === 0) {
                 // Get the current directory of the script
-                const currentDir = __dirname;
-                const projectBasePath = path.resolve(currentDir, "..", "..");
-                let system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
-                builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
-                console.log(builtPrompt)
-                if (builtPrompt != null) {
-                    prompt = builtPrompt
-                }
+              
                 console.log("Generating log advice...");
                 const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
                 linesToInsert = reponseService.extractLines(modelResponse, 0);
@@ -247,7 +203,7 @@ function activate(context) {
 
     let changeModel = vscode.commands.registerCommand('log-advice-generator.changeModelId', async () => {
         const MODEL_ID = await apiModelService.getModel();
-        const model = await vscode.window.showInputBox({ prompt: `Enter ${api} Model ID`, value: MODEL_ID });
+        const model = await vscode.window.showInputBox({ prompt: `Enter ${api_id} Model ID`, value: MODEL_ID });
         if (model) {
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification,
@@ -275,7 +231,7 @@ function activate(context) {
 
 
     let changeToken = vscode.commands.registerCommand('log-advice-generator.changeToken', async () => {
-        const token = await vscode.window.showInputBox({ prompt: `Enter ${api} Token` });
+        const token = await vscode.window.showInputBox({ prompt: `Enter ${api_id} Token` });
         if (token) {
             console.log(`Changing token`)
             const response = await apiModelService.changeToken(token);
