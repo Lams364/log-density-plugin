@@ -3,13 +3,12 @@ class ApiModel {
 
   static apiId
 
-  constructor(url, port, systemPrompt, initialModel, initialToke) {
+  constructor(url, port, initialModel, initialToke) {
     if (new.target === ApiModel) {
       throw new Error("Cannot instantiate abstract class ApiModelService directly.");
     }
     this.url = url;
     this.port = port;
-    this.systemContext = systemPrompt
     this.model = initialModel
     this.token = initialToke
   }

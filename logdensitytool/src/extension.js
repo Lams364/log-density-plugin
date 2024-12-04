@@ -9,12 +9,17 @@ const { registerJavaFileProvider, JavaFileProvider } = require('./providers/java
 const { registerAnalyzeFileProvider } = require('./providers/analyzeFileProvider');
 const { createApiModel, createResponse } = require('./services/factory');
 const { configuration } = require('./model_config');
-const { api_id, url, port, system_prompt, default_model, default_token, response_id } = configuration;
+const { readFile } = require("./utils/fileReader");
+const { buildPrompt } = require("./utils/promptBuilder")
+const path = require('path');
+
+
+const { api_id, url, port, prompt_file, default_model, default_token, response_id } = configuration;
 
 let trained = false;
 let remoteUrl; // Store the remote URL if needed
 const codeLensProvider = new LogDensityCodeLensProvider();
-const apiModelService = createApiModel(api_id, url, port, system_prompt, default_model, default_token)
+const apiModelService = createApiModel(api_id, url, port, default_model, default_token)
 const reponseService = createResponse(response_id)
 
 async function analyzeDocument(document) {
@@ -93,7 +98,7 @@ async function generateLogAdvice() {
     selectedText = getSurroundingMethodText(cursorLine);
 
     // Générer un prompt spécifique pour le modèle
-    const prompt = (
+    let prompt = (
         // Promt modifiable dans le backend dans un fichier config
         "Context: Suggest 1 log (System.out.println()) to add to method the following JAVA functions, don't return the input, only the output: \n"
         //+ "Please only add 2 to 5 lines of code to improve log messages to the following code: "
@@ -113,6 +118,15 @@ async function generateLogAdvice() {
             const model = await apiModelService.getModel();
             let linesToInsert = [];
             while (linesToInsert.length === 0) {
+                // Get the current directory of the script
+                const currentDir = __dirname;
+                const projectBasePath = path.resolve(currentDir, "..", "..");
+                let system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
+                builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
+                console.log(builtPrompt)
+                if (builtPrompt != null) {
+                    prompt = builtPrompt
+                }
                 console.log("Generating log advice...");
                 const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
                 linesToInsert = reponseService.extractLines(modelResponse, 0);

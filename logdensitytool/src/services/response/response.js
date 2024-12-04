@@ -9,8 +9,12 @@ class Response {
         }
     }
 
+    /**
+     * extract content form text, as list, each line is one item in list
+     * @param {*} text 
+     */
     extractLines(text) {
-        throw new Error("Method 'generate()' must be implemented.");
+        throw new Error("Method 'extractLines()' must be implemented.");
     }
 }
 
