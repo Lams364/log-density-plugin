@@ -92,17 +92,32 @@ async function generateLogAdvice() {
             let suggestedCode = modelResponse;
 
             const linesToInsert = reponseService.extractLines(suggestedCode, 0);
-            const cursorPosition = editor.selection.active;
-            const lineIndent = ' '.repeat(cursorPosition.character);
+            let cursorPosition = editor.selection.active;
+
+            // Detect indentation style based on the current line
+            const currentLineText = document.lineAt(cursorPosition.line).text;
+            const lineIndentMatch = currentLineText.match(/^\s*/); // Match leading whitespace (spaces or tabs)
+            const detectedIndent = lineIndentMatch ? lineIndentMatch[0] : ''; // Preserve tabs or spaces
 
             const edit = new vscode.WorkspaceEdit();
+
             for (let i = 0; i < linesToInsert.length; i++) {
                 let lineText = linesToInsert[i];
-                const formattedLine = i > 0 ? lineIndent + lineText : lineText;
-                edit.insert(document.uri, cursorPosition, formattedLine + "\n");
+
+                // Preserve the detected indentation for all lines after the first
+                const formattedLine = i > 0 ? detectedIndent + lineText : lineText;
+
+                console.log("Inserting line: ", formattedLine);
+                console.log("At position: ", cursorPosition);
+
+                // Insert the formatted line
+                edit.insert(document.uri, cursorPosition, formattedLine + '\n');
+
+                // Update cursor position to the start of the next line
+                // cursorPosition = cursorPosition.translate(1, 0); // Move to the next line
             }
 
-            // Apply the edit as a preview
+            // Apply the edit
             await vscode.workspace.applyEdit(edit);
 
             const userResponse = await vscode.window.showQuickPick(
