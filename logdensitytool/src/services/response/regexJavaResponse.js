@@ -1,10 +1,17 @@
 const Response = require("./response");
 
 class RegexJavaResponse extends Response {
-  static responseId = "regex";
 
   constructor() {
     super();
+  }
+
+  /**
+   * Returns response ID
+   * @returns string of responseId
+   */
+  static get responseId() {
+    return "regex";
   }
 
   /**
@@ -18,8 +25,8 @@ class RegexJavaResponse extends Response {
       reason\n
       \t\tlog_statement
     */
-    extractLines(text) {
-    return this.extractLog(text, tabluation);
+  extractLines(text) {
+    return this.extractLog(text);
   }
 
   extractLogStatement(str) {
@@ -48,8 +55,7 @@ class RegexJavaResponse extends Response {
 
   regexExtract(attribute, str) {
     // Create a dynamic regex with the attribute inserted
-    //const regex = new RegExp(`"${attribute}"\s*:\s*"([^"\\]*(\\.[^"\\]*)*)"`);
-    const regex = new RegExp('"' + attribute + '":\s*"([^"\\]*(\\.[^"\\]*)*)"');
+    const regex = new RegExp(`"${attribute}"\\s*:\\s*"([^"\\\\]*(\\\\.[^"\\\\]*)*)"`);
     const match = str.match(regex);
 
     if (match) {
@@ -59,18 +65,11 @@ class RegexJavaResponse extends Response {
     }
   }
 
-  extractLog(List, str, tabulation) {
-    const tabs = "\t".repeat(tabulation);
+  extractLog(str) {
     const reason = this.regexExtract("reason", str)
     const statement = this.regexExtract("log_statement", str)
     if (reason != null && statement != null) {
-      return (
-        "// " +
-        reason +
-        "\n" +
-        tabs +
-        statement
-      );
+      return ["//" + reason, statement]
     } else {
       return null;
     }

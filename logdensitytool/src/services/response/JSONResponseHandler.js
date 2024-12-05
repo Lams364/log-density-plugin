@@ -2,12 +2,18 @@ const Response = require("./response")
 
 class JSONResponseHandler extends Response {
 
-  static get responseId() {
-    return "json";
-  }
+  
 
   constructor() {
     super()
+  }
+
+  /**
+   * Returns response ID
+   * @returns string of responseId
+   */
+  static get responseId() {
+    return "json";
   }
 
   /**

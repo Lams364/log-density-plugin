@@ -8,11 +8,18 @@ const CircularJSON = require('circular-json');
 
 class OllamaApiModel extends ApiModel{
 
-  static apiId = "ollama"
 
   constructor(url, port, initialModel, initialToken) {
     super(url, port, initialModel, initialToken);
     this.init(initialModel, initialToken)
+  }
+
+  /**
+   * Returns api ID
+   * @returns string of apiId
+   */
+  static get apiId() {
+    return "ollama"
   }
   
   /**
@@ -26,6 +33,10 @@ class OllamaApiModel extends ApiModel{
    */
   async generate(model, system, prompt, temperature, max_token) {
 
+    if (!this.ready) {
+      throw new Error(`${this.constructor.name} is not ready yet. Please wait for initialization to complete.`);
+    }
+
     let usedTokens = 128 // (Default: 128, -1 = infinite generation, -2 = fill context)
     if (max_token !=null && max_token >= -2) usedTokens = max_token
 
@@ -38,8 +49,8 @@ class OllamaApiModel extends ApiModel{
         system: system,
         stream: false,
         options: {
-            temperature: temperature,
-            num_predict: max_token
+            temperature: usedTemp,
+            num_predict: usedTokens
         }
     }) 
     return response.data.response;
@@ -91,6 +102,7 @@ class OllamaApiModel extends ApiModel{
    * @returns {string} Model configured
    */
   async getModel() {
+
     const response = await Get(this.url, this.port, '/api/ps', null)
     if (response.data.models.length > 0) {
         return response.data.models[0].name;
@@ -113,8 +125,8 @@ class OllamaApiModel extends ApiModel{
    * @param {string} token - Token used for initalisation
    */
   async init(model, token) {
-    this.changeModel(model);
-
+    await this.changeModel(model);
+    this.ready = true
   }
 
   async load(model) {

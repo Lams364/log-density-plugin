@@ -1,8 +1,6 @@
 // Abstract Base Class
 class ApiModel {
 
-  static apiId
-
   constructor(url, port, initialModel, initialToke) {
     if (new.target === ApiModel) {
       throw new Error("Cannot instantiate abstract class ApiModelService directly.");
@@ -11,6 +9,15 @@ class ApiModel {
     this.port = port;
     this.model = initialModel
     this.token = initialToke
+    this.ready = false
+  }
+  
+  /**
+   * Returns api ID
+   * @returns string of apiId
+   */
+  static get apiId() {
+    return ""
   }
 
   async generate(model, system, prompt, temperature, max_token) {

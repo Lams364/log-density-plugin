@@ -40,4 +40,7 @@ function createResponse(responseId) {
 
 }
 
-module.exports = {createApiModel, createResponse};
+module.exports = {
+  createApiModel, 
+  createResponse
+};

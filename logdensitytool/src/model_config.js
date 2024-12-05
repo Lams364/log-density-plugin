@@ -8,6 +8,7 @@ const OllamaApiModel = require("./services/apiModel/ollamaApiModel");
 
 // Response IDs type available
 const JSONResponseHandler = require("./services/response/JSONResponseHandler");
+const RegexJavaResponse = require("./services/response/regexJavaResponse")
 const StandardResponse = require("./services/response/standardResponse");
 
 let configuration = {

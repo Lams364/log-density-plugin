@@ -23,7 +23,7 @@ const apiModelService = createApiModel(api_id, url, port, default_model, default
 const reponseService = createResponse(response_id)
 
 async function analyzeDocument(document) {
-    if (document?.languageId !== "java") {
+    if (document && document.languageId !== "java") {
         return;
     }
     const { blocks } = await runModel(remoteUrl, document.getText());
@@ -37,18 +37,17 @@ async function generateLogAdvice() {
         return;
     }
 
-
     const document = editor.document;
     const selection = editor.selection;
     const cursorLine = selection.active.line; // Ligne actuelle du curseur
+    let selectedText = ""
 
     if (!selection.isEmpty) {
         // L'utilisateur a sélectionné du texte (méthode)
         selectedText = document.getText(selection);
     }
 
-    selectedText = getSurroundingMethodText(cursorLine);
-    console.log(selectedText)
+    selectedText = getSurroundingMethodText(document, cursorLine);
 
     // Générer un prompt spécifique pour le modèle
     let prompt = (
@@ -70,18 +69,15 @@ async function generateLogAdvice() {
             // Call your LLM service
             const model = await apiModelService.getModel();
 
-            // Get the current directory of the script
-            const projectBasePath = path.resolve(__dirname, "..", "..");
-            let system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
-            builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
-            console.log(builtPrompt)
-            if (builtPrompt != null) {
-                prompt = builtPrompt
-            }
-
             let linesToInsert = [];
             while (linesToInsert.length === 0) {
                 // Get the current directory of the script
+                const projectBasePath = path.resolve(__dirname, "..", "..");
+                const system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
+                const builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
+                if (builtPrompt != null) {
+                    prompt = builtPrompt
+                }
               
                 console.log("Generating log advice...");
                 const modelResponse = await apiModelService.generate(model, null, prompt, null, null);

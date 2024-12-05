@@ -3,11 +3,17 @@ const ApiModel = require('./apiModel');
 
 class HfApiModel extends ApiModel {
 
-  static apiId = "huggingface"
-
   constructor(url, port, initialModel, initialToken) {
     super(url, port, initialModel, initialToken);
     this.init(initialModel, initialToken)
+  }
+
+  /**
+   * Returns api ID
+   * @returns string of apiId
+   */
+  static get apiId() {
+    return "huggingface"
   }
   
   /**
@@ -20,6 +26,11 @@ class HfApiModel extends ApiModel {
    * @returns {string} Model response
    */
   async generate(model, system, prompt, temperature, max_token) {
+
+    if (!this.ready) {
+      throw new Error(`${this.constructor.name} is not ready yet. Please wait for initialization to complete.`);
+    }
+
     const response = await Post(this.url, this.port, '/predict', 
       {
         model: model, // Not implemented
@@ -70,7 +81,6 @@ class HfApiModel extends ApiModel {
   async changeToken(token) {
     this.token = token
     const response = await Post(this.url, this.port, '/change_token', {hf_token: this.token})
-    //console.log(JSON.stringify(response.data, null, 2))
     return {completed: response.data.completed, message: ""}
   }
 
@@ -80,8 +90,9 @@ class HfApiModel extends ApiModel {
    * @param {string} token - Token used for initalisation
    */
   async init(model, token) {
-    this.changeModel(model);
-    this.changeToken(token);
+    await this.changeModel(model);
+    await this.changeToken(token);
+    this.ready = true
   }
 
   buildPrompt(context, prompt) {

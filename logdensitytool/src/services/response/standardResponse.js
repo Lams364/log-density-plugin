@@ -2,10 +2,16 @@ const Response = require("./response")
 
 class StandardResponse extends Response {
 
-  static responseId = "standard"
-
   constructor() {
     super()
+  }
+
+  /**
+   * Returns response ID
+   * @returns string of responseId
+   */
+  static get responseId() {
+    return "standard";
   }
 
   /**
