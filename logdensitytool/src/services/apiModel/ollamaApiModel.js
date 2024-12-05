@@ -75,10 +75,14 @@ class OllamaApiModel extends ApiModel{
         model: modelName,
         stream: false
     })
-    console.log(`Loading ${modelName}`)
-    await this.load(modelName)
-    this.model = modelName
-    return {completed: response.data.completed, model: response.data.model_name}
+    if (response.data.status == "success") {
+      console.log(`Loading ${modelName}`)
+      await this.load(modelName)
+      this.model = modelName
+      return {completed: true, model: this.model}
+    } else {
+      return {completed: false, model: this.model}
+    }
   }
   
   /**
