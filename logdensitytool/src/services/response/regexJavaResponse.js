@@ -1,7 +1,6 @@
 const Response = require("./response");
 
 class RegexJavaResponse extends Response {
-
   constructor() {
     super();
   }
@@ -15,64 +14,46 @@ class RegexJavaResponse extends Response {
   }
 
   /**
-   * Extract log_statement and reason in model response and 
-   * build response
-   * @param {string} text Model response
-   * @param {int} tabluation tabulation in Code editor
-   * @returns {string} built response :
-   * 
-   *Ex:
-      reason\n
-      \t\tlog_statement
-    */
-  extractLines(text) {
-    return this.extractLog(text);
-  }
+   *
+   * @param {string} text Text to parse
+   * @param {string[]} requiredAttributes Attributes required to
+   * @param {string[]} attributesToComment List of attributes to comment
+   * @param {string} commentString comment string Ex: "//" in Java
+   * @returns {string[]} List of string 
+   */
+  extractLines(text, requiredAttributes, attributesToComment, commentString) {
+    let extractedAttributes = [];
+    const regex = /"([^"]+)":\s*"((?:[^"\\]|\\.)*)"/g; // Regex to match key-value pairs in JSON
 
-  extractLogStatement(str) {
-    //const regex = /"log_statement":\s*"([^"\\]*(\\.[^"\\]*)*)"/;
+    let match;
+    const foundAttributes = new Set();
 
-    const regex = /"log_statement"\s*:\s*"([^"\\]*(\\.[^"\\]*)*)"/;
-    const match = str.match(regex);
+    while ((match = regex.exec(text)) !== null) {
+      let key = match[1]; // Extracted key
+      let value = match[2]; // Extracted value
 
-    if (match) {
-      return match[1].replace(/\\"/g, '"');
-    } else {
-      return null;
+      // If the key is in the requiredAttributes list, add its value to the result list
+      if (requiredAttributes.includes(key)) {
+        value = value.replace(/\\"/g, '"')
+        if (attributesToComment.includes(key)) {
+          value = commentString + " " + value;
+          extractedAttributes.unshift(value);
+        } else {
+          extractedAttributes.push(value);
+        }
+        
+        foundAttributes.add(key); // Mark this key as found
+      }
     }
-  }
 
-  extractLogReason(str) {
-    const regex = /"reason"\s*:\s*"([^"\\]*(\\.[^"\\]*)*)"/;
-    const match = str.match(regex);
-
-    if (match) {
-      return match[1].replace(/\\"/g, '"');
-    } else {
-      return null;
+    // If not all required attributes were found, return an empty list
+    for (let attr of requiredAttributes) {
+      if (!foundAttributes.has(attr)) {
+        return []; // Return empty list if any required attribute is missing
+      }
     }
-  }
 
-  regexExtract(attribute, str) {
-    // Create a dynamic regex with the attribute inserted
-    const regex = new RegExp(`"${attribute}"\\s*:\\s*"([^"\\\\]*(\\\\.[^"\\\\]*)*)"`);
-    const match = str.match(regex);
-
-    if (match) {
-      return match[1].replace(/\\"/g, '"');
-    } else {
-      return null;
-    }
-  }
-
-  extractLog(str) {
-    const reason = this.regexExtract("reason", str)
-    const statement = this.regexExtract("log_statement", str)
-    if (reason != null && statement != null) {
-      return ["//" + reason, statement]
-    } else {
-      return null;
-    }
+    return extractedAttributes;
   }
 }
 

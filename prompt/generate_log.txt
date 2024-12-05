@@ -4,7 +4,7 @@ Generate one log message to add to this Java method in eempty spaces:
 
 The response should be in the following json form and without any other explanations: 
 
-{
+{{
     "log_statement": "System.out.println(<log message or variable>);", 
     "reason": "how did you reason to generate the log message"
-}
+}}

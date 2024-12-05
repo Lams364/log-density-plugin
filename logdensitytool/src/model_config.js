@@ -14,7 +14,9 @@ let configuration = {
     prompt_file : "generate_log.txt", // From prompt Folder
     default_model : "llama3.2:3b",
     default_token : "", // Only used for huggingface
-    response_id :  JSONResponseHandler.responseId // standard or regex available
+    response_id :  JSONResponseHandler.responseId, // standard or regex available
+    attributes_to_comment : ["reason"], // list of attributes to comment
+    comment_string : "//" // Comment string to add
 }
 
 

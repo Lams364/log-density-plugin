@@ -19,7 +19,7 @@ class Response {
      * extract content form text, as list, each line is one item in list
      * @param {string} text 
      */
-    extractLines(text) {
+    extractLines(text, requiredAttributes, attributesToComment, commentString) {
         throw new Error("Method 'extractLines()' must be implemented.");
     }
 

@@ -17,9 +17,9 @@ class StandardResponse extends Response {
   /**
    * Return model response without modification
    * @param {string} text 
-   * @returns (string) text
+   * @returns {string} text list
    */
-  extractLines(text) {
+  extractLines(text, requiredAttributes, attributesToComment, commentString) {
     return text.split('\n')
   }
 

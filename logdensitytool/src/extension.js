@@ -1,5 +1,5 @@
+const StandardResponse = require("./services/response/standardResponse");
 const vscode = require('vscode');
-const axios = require('axios');
 const { getGitRemoteUrl } = require('./utils/gitHelper'); // Import the required function
 const LogDensityCodeLensProvider = require('./providers/logDensityCodeLensProvider');
 const { registerOpenTabsSideBarProvider, OpenTabsSidebarProvider } = require('./providers/openTabsSidebarProvider');
@@ -10,17 +10,22 @@ const { registerAnalyzeFileProvider } = require('./providers/analyzeFileProvider
 const { createApiModel, createResponse } = require('./services/factory');
 const { configuration } = require('./model_config');
 const { readFile } = require("./utils/fileReader");
-const { buildPrompt, getSurroundingMethodText } = require("./utils/modelTools")
+const { buildPrompt, getSurroundingMethodText, extractAttributesFromJson } = require("./utils/modelTools")
 const path = require('path');
 
-
-const { api_id, url, port, prompt_file, default_model, default_token, response_id } = configuration;
+const { api_id, url, port, prompt_file, default_model, default_token, response_id, attributes_to_comment, comment_string } = configuration;
 
 let trained = false;
 let remoteUrl; // Store the remote URL if needed
+let apiModelService;
+let reponseService;
 const codeLensProvider = new LogDensityCodeLensProvider();
-const apiModelService = createApiModel(api_id, url, port, default_model, default_token)
-const reponseService = createResponse(response_id)
+
+
+function initialize() {
+    apiModelService = createApiModel(api_id, url, port, default_model, default_token);
+    reponseService = createResponse(response_id);
+}
 
 async function analyzeDocument(document) {
     if (document && document.languageId !== "java") {
@@ -73,7 +78,17 @@ async function generateLogAdvice() {
             while (linesToInsert.length === 0) {
                 // Get the current directory of the script
                 const projectBasePath = path.resolve(__dirname, "..", "..");
-                const system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file))
+                let system_prompt = await readFile(path.join(projectBasePath, "prompt", prompt_file)) // Extract prompt from txt file
+
+                let attributes = []
+                // Find and extract attributes from prompt {{json}}
+                if (system_prompt.includes("{{") && system_prompt.includes("}}")) {
+                    attributes = extractAttributesFromJson(system_prompt, attributes_to_comment) // Extract attributes from prompt {{json}}
+                    system_prompt = system_prompt.replace("{{", "{");
+                    system_prompt = system_prompt.replace("}}", "}");
+                }
+                
+                // Build Prompt
                 const builtPrompt = buildPrompt(selectedText, system_prompt, "{vscode_content}")
                 if (builtPrompt != null) {
                     prompt = builtPrompt
@@ -81,7 +96,13 @@ async function generateLogAdvice() {
               
                 console.log("Generating log advice...");
                 const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
-                linesToInsert = reponseService.extractLines(modelResponse, 0);
+                if (attributes.length > 0) {
+                    linesToInsert = reponseService.extractLines(modelResponse, attributes, attributes_to_comment, comment_string);
+                } else {
+                    const standardResponse = createResponse(StandardResponse.responseId)
+                    linesToInsert = standardResponse.extractLines(modelResponse, attributes, attributes_to_comment, comment_string);
+                }
+                
             }
 
             let cursorPosition = editor.selection.active;
@@ -130,8 +151,9 @@ async function generateLogAdvice() {
 }
 
 function activate(context) {
-    //const workspaceRoot = vscode.workspace.rootPath;
-
+    initialize();
+    const workspaceRoot = vscode.workspace.rootPath;
+    
     // Register Codelens
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'java' }, codeLensProvider));
 

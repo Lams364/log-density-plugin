@@ -33,7 +33,7 @@ function createResponse(responseId) {
     case JSONResponseHandler.responseId:
       return new JSONResponseHandler()
     case RegexJavaResponse.responseId:
-      return RegexJavaResponse
+      return new RegexJavaResponse()
     default:
       throw new Error(`Unsupported Response type: ${responseId}`);
   }
