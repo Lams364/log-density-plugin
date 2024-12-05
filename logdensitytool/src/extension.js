@@ -124,13 +124,13 @@ async function generateLogAdvice() {
             }
         } catch (error) {
             console.error(error);
-            vscode.window.showErrorMessage("Failed to get code suggestion.");
+            vscode.window.showErrorMessage("Failed to get code suggestion. " + error.message);
         }
     });
 }
 
 function activate(context) {
-    const workspaceRoot = vscode.workspace.rootPath;
+    //const workspaceRoot = vscode.workspace.rootPath;
 
     // Register Codelens
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'java' }, codeLensProvider));

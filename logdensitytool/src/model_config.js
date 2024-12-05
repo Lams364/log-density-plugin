@@ -1,7 +1,3 @@
-const { readFile } = require("./utils/fileReader");
-const path = require('path');
-const projectPath = __dirname; 
-
 // API IDs available
 const HfApiModel = require("./services/apiModel/hfApiModel");
 const OllamaApiModel = require("./services/apiModel/ollamaApiModel");

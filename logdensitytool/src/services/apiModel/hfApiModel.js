@@ -31,14 +31,17 @@ class HfApiModel extends ApiModel {
       throw new Error(`${this.constructor.name} is not ready yet. Please wait for initialization to complete.`);
     }
 
-    const response = await Post(this.url, this.port, '/predict', 
-      {
+    try {
+      const response = await Post(this.url, this.port, '/predict', {
         model: model, // Not implemented
         prompt: this.buildPrompt(system, prompt), 
         max_new_tokens: max_token, 
         temperature: temperature // Not implemented
       }) 
-    return response.data.content;
+      return response.data.content;
+    } catch (error) {
+      throw error; // Re-throw the error to propagate it upwards
+    }
   }
 
   /**
@@ -93,6 +96,7 @@ class HfApiModel extends ApiModel {
     await this.changeModel(model);
     await this.changeToken(token);
     this.ready = true
+    console.log(`${this.constructor.name} initialization complete.`)
   }
 
   buildPrompt(context, prompt) {

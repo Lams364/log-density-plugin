@@ -37,23 +37,27 @@ class OllamaApiModel extends ApiModel{
       throw new Error(`${this.constructor.name} is not ready yet. Please wait for initialization to complete.`);
     }
 
-    let usedTokens = 128 // (Default: 128, -1 = infinite generation, -2 = fill context)
-    if (max_token !=null && max_token >= -2) usedTokens = max_token
+    try {
+      let usedTokens = 128 // (Default: 128, -1 = infinite generation, -2 = fill context)
+      if (max_token !=null && max_token >= -2) usedTokens = max_token
 
-    let usedTemp = 0.8 // (Default: 0.8) value between 0 and 1. Increasing the temperature will make the model answer more creatively. 
-    if (temperature !=null && temperature >= 0 && temperature <= 1 ) usedTemp = temperature
+      let usedTemp = 0.8 // (Default: 0.8) value between 0 and 1. Increasing the temperature will make the model answer more creatively. 
+      if (temperature !=null && temperature >= 0 && temperature <= 1 ) usedTemp = temperature
 
-    const response = await Post(this.url, this.port, '/api/generate', {
-        model: model, // Not implemented
-        prompt: prompt, 
-        system: system,
-        stream: false,
-        options: {
-            temperature: usedTemp,
-            num_predict: usedTokens
-        }
-    }) 
-    return response.data.response;
+      const response = await Post(this.url, this.port, '/api/generate', {
+          model: model, // Not implemented
+          prompt: prompt, 
+          system: system,
+          stream: false,
+          options: {
+              temperature: usedTemp,
+              num_predict: usedTokens
+          }
+      }) 
+      return response.data.response;
+    } catch (error) {
+      throw error; // Re-throw the error to propagate it upwards
+    }
   }
 
   /**
@@ -127,6 +131,7 @@ class OllamaApiModel extends ApiModel{
   async init(model, token) {
     await this.changeModel(model);
     this.ready = true
+    console.log(`${this.constructor.name} initialization complete.`)
   }
 
   async load(model) {

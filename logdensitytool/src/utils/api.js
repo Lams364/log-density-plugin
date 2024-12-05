@@ -16,6 +16,10 @@ async function Post(url, port, path, args) {
 				'Content-Type': 'application/json',
 			}
 		});
+		// Check for non-200 status codes
+		if (response.status !== 200) {
+			throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+		}
 		return response
 	} catch (error) {
 		handleError(error)
@@ -27,32 +31,41 @@ async function Post(url, port, path, args) {
  * will add params to url ex: http://localhost:8080/api?param1=testing1&param2=2
  */
 async function Get(url, port, path, params) {
-
-	const URL = `${url}:${port}`
-	let parameters = ""
-	if (params != null && typeof params === 'object') {
-        parameters = '?' + Object.entries(params)
-            .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-            .join('&');
-    }
-	return await axios.get(URL + path + parameters);
+	try {
+		const URL = `${url}:${port}`
+		let parameters = ""
+		if (params != null && typeof params === 'object') {
+			parameters = '?' + Object.entries(params)
+				.map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+				.join('&');
+		}
+		const response = await axios.get(URL + path + parameters);
+		// Check for non-200 status codes
+		if (response.status !== 200) {
+			throw new Error(`HTTP Error: ${response.status} - ${response.statusText}`);
+		}
+		return response
+	} catch (error) {
+		handleError(error)
+	}
+	
 }
 
 function handleError(error) {
     if (error.response) {
         // The server responded with a status code outside 2xx range
-        console.error(`Backend Error: ${error.response.status} - ${error.response.statusText}`);
-        console.error(`Details: ${error.response.data}`);
+		throw new Error(`Backend Error: ${error.response.status} - ${error.response.statusText}`);
     } else if (error.request) {
         // The request was made but no response was received
-        console.error('No response received from backend');
-        console.error(`Request details: ${JSON.stringify(error.response.data, null, 2)}`);
+        // console.error(`Request details: ${JSON.stringify(error.response.data, null, 2)}`);
+		throw new Error('No response received from backend');
     } else {
         // Something went wrong while setting up the request
-        console.error('Error setting up request:', error.code);
+        // console.error('Error setting up request:', error.code);
+		throw new Error('Request failed');
     }
-    // Optionally, re-throw the error or return a custom message
-    throw new Error('Request failed');
+
+
 }
 
 module.exports = {
