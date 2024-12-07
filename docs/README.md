@@ -4,8 +4,7 @@ Welcome to the documentation for log-density-plugin project. Use the links below
 
 - [Installation Guide](INSTALLATION.md)
 - [Usage Instructions](USAGE.md)
+- [Artefact Documentation](ARTEFACT.md)
 - [Contributing Guide](CONTRIBUTING.md)
-- [API Reference](API_REFERENCE.md)
-- [Troubleshooting](TROUBLESHOOTING.md)
 
 If you have questions, feel free to open an issue in the repository.

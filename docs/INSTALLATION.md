@@ -30,7 +30,7 @@
 
 ## Ollama
 
-For more information (using GPU, App, Commands and API) : [Ollama](/docs/ollama.md)
+For more information (using GPU, App, Commands and API) : [Ollama](log-assistant-tool/OLLAMA.md)
 
 ## Testing
 

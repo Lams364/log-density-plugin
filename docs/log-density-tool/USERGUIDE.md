@@ -1,93 +1,95 @@
-# User Guide for the "Log Density Tool" Extension
-
-## Table of Contents
-
-- [User Guide for the "Log Density Tool" Extension](#user-guide-for-the-log-density-tool-extension)
-  - [Table of Contents](#table-of-contents)
+- [Guide d'utilisation de l'extension "Log Density Tool"](#guide-dutilisation-de-lextension-log-density-tool)
+  - [Table des matières](#table-des-matières)
   - [1. Introduction](#1-introduction)
-  - [2. Setup](#2-setup)
-  - [3. Getting Started](#3-getting-started)
-  - [4. Using the Extension](#4-using-the-extension)
-    - [4.1 Create an AI Learning Model](#41-create-an-ai-learning-model)
-    - [4.2 Analyze a JAVA file to get the appropriate logging density](#42-analyze-a-java-file-to-get-the-appropriate-logging-density)
-    - [4.3 Analyze multiple JAVA files to get the appropriate logging density](#43-analyze-multiple-java-files-to-get-the-appropriate-logging-density)
+  - [2. Configuration](#2-configuration)
+  - [3. Démarrage](#3-démarrage)
+  - [4. Utilisation de l'extension](#4-utilisation-de-lextension)
+    - [4.1 Créer un modèle d'apprentissage AI](#41-créer-un-modèle-dapprentissage-ai)
+    - [4.2 Analyser un fichier JAVA pour obtenir la densité d’instructions de journalisation appropriée](#42-analyser-un-fichier-java-pour-obtenir-la-densité-dinstructions-de-journalisation-appropriée)
+    - [4.3 Analyser plusieurs fichiers JAVA pour obtenir la densité d’instructions de journalisation appropriée](#43-analyser-plusieurs-fichiers-java-pour-obtenir-la-densité-dinstructions-de-journalisation-appropriée)
+
+# Guide d'utilisation de l'extension "Log Density Tool"
+
+## Table des matières
 
 ## 1. Introduction
 
-Welcome to the user guide for the "Log Density Tool" extension, designed to suggest the appropriate logging density for a given Java file. This guide will help you get started with the tool.
+Bienvenue dans le guide d'utilisation de l'extension "Log Density Tool", conçue pour suggérer la densité d’instructions de journalisation appropriée pour un fichier Java donné. Ce guide facilitera votre prise en main de l'outil.
 
-## 2. Setup
+## 2. Configuration
 
-- Run `npm install` in the "logdensitytool" folder to enable the extension.
+- Faire "npm install" dans le dossier "logdensitytool" pour être capable de lancer l'extension.
 
-## 3. Getting Started
+## 3. Démarrage
 
-- Launch the extension by pressing the F5 key.
+- Lancer l'extension en appuyant sur le bouton F5.
 
-![Extension Started](../resources/userGuide/image.png)
+![L'extension démarrée](../resources/userGuide/image.png)
 
-## 4. Using the Extension
+## 4. Utilisation de l'extension
 
-### 4.1 Create an AI Learning Model
+### 4.1 Créer un modèle d'apprentissage AI
 
-- Access the command menu from the search bar by pressing Ctrl + Shift + P.
+- Accéder aux commandes du menu de la barre de recherche en appuyant sur Ctrl + Shift + P.
 
-![Commands](../resources/userGuide/image-1.png)
+![Commandes](../resources/userGuide/image-1.png)
 
-- Type "Send GitHub URL" in the search bar and select this option.
+- Taper "Send GitHub URL" dans la barre de recherche et sélectionnez cette option.
 
 ![Send GitHub URL](../resources/userGuide/image-2.png)
 
-- Enter the URL of a GitHub project. If a model has already been trained on the same project, it will not train again, and a message will notify the user that the model is already trained.
+- Saisir l'URL d'un projet GitHub. Si un modèle AI a déjà été entraîné sur un même projet, l'entraînement
+  ne se fera pas de nouveau et un message s'affiche à l'utilisateur pour l'avertir que le modèle a déjà été entraîné.
 
-![Enter URL](../resources/userGuide/image-3.png)
+![Saisir l'URL](../resources/userGuide/image-3.png)
 
-- Wait for the model training to complete. Once completed, the trained model files can be found in the "training_data" subfolder of the "services" folder in the file explorer.
+- Attendre que l'entraînement du modèle finisse. Une fois l'entraînement terminé, les fichiers du modèle entraîné se trouvent dans le sous-dossier "training_data" du dossier "services" dans l'explorateur de fichiers.
 
-![Training](../resources/userGuide/image-5.png)
+![Entraînement](../resources/userGuide/image-5.png)
 
-![File Explorer](../resources/userGuide/image-6.png)
+![Explorateur de fichiers](../resources/userGuide/image-6.png)
 
-### 4.2 Analyze a JAVA file to get the appropriate logging density
+### 4.2 Analyser un fichier JAVA pour obtenir la densité d’instructions de journalisation appropriée
 
-- Open the trained project by clicking on "Open Folder" and selecting its folder in `training_data`.
+- Ouvrir le projet qui a été entraîné en cliquant sur open folder et en allant sélectionner son dossier dans training_data.
 
-![Open Folder](../resources/userGuide/image-7.png)
+![Ouvrir un dossier](../resources/userGuide/image-7.png)
 
-![Select Folder](../resources/userGuide/image-8.png)
+![Sélectionner le dossier](../resources/userGuide/image-8.png)
 
-- Open the desired JAVA file by clicking on it in the file explorer in the window opened after pressing F5 at the start.
+- Ouvrir le fichier JAVA désiré en cliquant dessus depuis l'explorateur de fichier qui se trouve dans la fenêtre qui a été ouverte après avoir pesé sur F5 au début.
 
-![Open JAVA File](../resources/userGuide/image-9.png)
+![Ouvrir un fichier JAVA](../resources/userGuide/image-9.png)
 
-- View the current and desired densities displayed as categories in the opened file. The analysis occurs automatically when opening the file. It is possible to see the opened files in the "CURRENTLY OPENED TABS" view and perform an analysis to obtain current and desired densities in numbers by clicking on "Analyze Open Tabs."
+- Visualiser dans le fichier ouvert la densité actuelle et la densité désirée affichées sous forme de catégories une fois qu'elles apparaissent dans le fichier. L'analyse se fait automatiquement à l'ouverture du fichier. Il est possible
+  de voir les fichiers ouverts dans la vue "CURRENTLY OPENED TABS" et de faire une analyse pour obtenir les densités actuelles et désirées en chiffres sur les fichiers ouverts en cliquant sur "Analyze Open Tabs".
 
-![Category Analysis](../resources/userGuide/image-12.png)
+![Analyse en catégories](../resources/userGuide/image-12.png)
 
-![Analyze Open Tabs](../resources/userGuide/image-13.png)
+![Analyse Open Tabs](../resources/userGuide/image-13.png)
 
-![Numerical Analysis](../resources/userGuide/image-14.png)
+![Analyse en chiffres](../resources/userGuide/image-14.png)
 
-### 4.3 Analyze multiple JAVA files to get the appropriate logging density
+### 4.3 Analyser plusieurs fichiers JAVA pour obtenir la densité d’instructions de journalisation appropriée
 
-- Open the trained project by clicking on "Open Folder" and selecting its folder in `training_data`.
+- Ouvrir le projet qui a été entraîné en cliquant sur open folder et en allant sélectionner son dossier dans training_data.
 
-![Open Folder](../resources/userGuide/image-7.png)
+![Ouvrir un dossier](../resources/userGuide/image-7.png)
 
-![Select Folder](../resources/userGuide/image-8.png)
+![Sélectionner le dossier](../resources/userGuide/image-8.png)
 
-- Select "Add File" to choose the JAVA file(s) or folder(s) to analyze in the "JAVA FILES" view. If a folder is selected, all JAVA files in its subfolders are also added. The added files or folders appear in the "JAVA FILES TO ANALYZE" view.
+- Sélectionner "Add File" pour choisir le(s) dossier(s) ou le(s) fichier(s) JAVA à analyser dans la vue "JAVA FILES". Si un dossier est sélectionné, tous les fichiers JAVA de ses sous-dossiers sont ajoutés également. Les dossiers ou fichiers ajouté se trouvent dans la vue "JAVA FILES TO ANALYZE".
 
 ![Add File](../resources/userGuide/image-17.png)
 
 ![JAVA FILES TO ANALYZE](../resources/userGuide/image-16.png)
 
-- Remove a file if needed by clicking "Remove File." It is also possible to remove all files by clicking "Remove All Files."
+- Retirer un fichier au besoin en cliquant sur "Remove File". Il est possible de retirer tous les fichiers en cliquant sur "Remove All Files".
 
 ![Remove Files](../resources/userGuide/image-18.png)
 
-- Start the analysis by clicking the blue arrow icon "Send Selected Files for Analysis." The densities, displayed as numbers, will be visible in the "JAVA FILES" view. A color-coded icon appears next to the analyzed files. These colors range from "Low" to "High." "Low" is indicated by green, "Medium" by yellow, and "High" by red. They represent the difference between the current and suggested densities. If the difference is small, the color is green, and the logic follows for the other colors.
+- Lancer l'analyse en cliquant sur l'icône de la flèche bleue "Send Selected Files for Analysis". Les densités, affichées en chiffres, seront visibles dans la vue "JAVA FILES". Un icône de couleur se trouve à côté des fichiers analysés. Ces couleurs varient de "Faible" à "Élevée". "Faible" est indiquée par le vert, "Moyenne" par le jaune, et "Élevée" par le rouge. Elles représentent la différence entre la densité actuelle et suggérée. Si la différence est faible entre les deux densités, la couleur est verte et la logique s'en suit pour les autres couleurs.
 
-![Blue Arrow](../resources/userGuide/image21.png)
+![Flèche Bleue](../resources/userGuide/image21.png)
 
-![File Analysis](../resources/userGuide/image-20.png)
+![Analyse de fichiers](../resources/userGuide/image-20.png)
