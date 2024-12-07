@@ -17,7 +17,7 @@ let configuration = {
     response_id :  JSONResponseHandler.responseId, // standard or regex available
     attributes_to_comment : ["reason"], // list of attributes to comment
     comment_string: "//", // Comment string to add
-    injection_variable: "{vscode_content}" // inject vscode content in prompt
+    injection_variable: "{vscode_content}" // variable to inject vscode content in prompt
 }
 
 
