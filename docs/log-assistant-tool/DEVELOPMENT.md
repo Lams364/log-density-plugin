@@ -161,3 +161,5 @@ The `attributes_to_comment` array holds keys from the generated JSON that should
 - **API Services:** Switch between Ollama and HuggingFace by changing `api_id` and related parameters.
 
 By adjusting these configurations and prompts, you can tailor the log advice generation to fit your development environment, coding standards, and desired output format.
+
+For information the process of the generation you can consult this sequence diagram : [sequence diagram - generate log advice](../ARTIFACTS.md#sequence-diagrams---log-assistant-tool)
