@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { post, get } = require('../../utils/api');
-const ApiModel = require('./apiModel');
+const ApiModel = require('./apiModelService');
 const CircularJSON = require('circular-json');
 
 /**
@@ -63,23 +63,23 @@ class OllamaApiModel extends ApiModel{
 
   /**
    * Changes the model being used.
-   * @param {string} modelName - The name of the new model.
+   * @param {string} modelId - The name of the new model.
    * @returns {completed: boolean, model: string} completed, true if model changed, false if not, model, indicate the model configured
    */
-  async changeModel(modelName) {
-    if (this.model != modelName) {
+  async changeModel(modelId) {
+    if (this.model != modelId) {
       console.log(`Unloading ${this.model}`)
       await this.unload(this.model)
     }
-    console.log(`Pull ${modelName}`)
+    console.log(`Pull ${modelId}`)
     const response = await post(this.url, this.port, '/api/pull', {
-        model: modelName,
+        model: modelId,
         stream: false
     })
     if (response.data.status == "success") {
-      console.log(`Loading ${modelName}`)
-      await this.load(modelName)
-      this.model = modelName
+      console.log(`Loading ${modelId}`)
+      await this.load(modelId)
+      this.model = modelId
       return {completed: true, model: this.model}
     } else {
       return {completed: false, model: this.model}

@@ -25,7 +25,7 @@ class ApiModel {
     throw new Error("Method 'generate()' must be implemented.");
   }
 
-  async changeModel(modelName) {
+  async changeModel(modelId) {
     throw new Error("Method 'changeModel()' must be implemented.");
   }
 

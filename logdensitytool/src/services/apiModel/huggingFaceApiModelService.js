@@ -1,7 +1,7 @@
 const { post, get } = require('../../utils/api');
-const ApiModel = require('./apiModel');
+const ApiModel = require('./apiModelService');
 
-class HfApiModel extends ApiModel {
+class HuggingFaceApiModel extends ApiModel {
 
   constructor(url, port, initialModel, initialToken) {
     super(url, port, initialModel, initialToken);
@@ -46,12 +46,12 @@ class HfApiModel extends ApiModel {
 
   /**
    * Changes the model being used.
-   * @param {string} modelName - The name of the new model.
+   * @param {string} modelId - The name of the new model.
    * @returns {completed: boolean, model: string} completed, true if model changed, false if not, model, indicate the model configured
    */
-  async changeModel(modelName) {
-    const response = await post(this.url, this.port, '/change_model', {hf_model_id: modelName})
-    this.model = modelName
+  async changeModel(modelId) {
+    const response = await post(this.url, this.port, '/change_model', {hf_model_id: modelId})
+    this.model = modelId
     return {completed: response.data.completed, model: response.data.model_name}
   }
   
@@ -104,4 +104,4 @@ class HfApiModel extends ApiModel {
   }
 }
 
-module.exports = HfApiModel;
+module.exports = HuggingFaceApiModel;

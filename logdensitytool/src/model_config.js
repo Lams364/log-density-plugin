@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 // API IDs available
-const HfApiModel = require("./services/apiModel/hfApiModel");
-const OllamaApiModel = require("./services/apiModel/ollamaApiModel");
+const HuggingFaceApiModel = require("./services/apiModel/huggingFaceApiModelService");
+const OllamaApiModel = require("./services/apiModel/ollamaApiModelService");
 
 // Response IDs type available
-const JSONResponseHandler = require("./services/response/JSONResponseHandler");
-const RegexJavaResponse = require("./services/response/regexJavaResponse")
-const StandardResponse = require("./services/response/standardResponse");
+const JsonResponse = require("./services/response/jsonResponseService");
+const RegexResponse = require("./services/response/regexResponseService")
+const StandardResponse = require("./services/response/standardResponseService");
 
 let configuration = {
     api_id : OllamaApiModel.apiId, //ollama and huggingface available
@@ -14,7 +15,7 @@ let configuration = {
     prompt_file : "generate_log.txt", // From prompt Folder
     default_model : "llama3.2:3b",
     default_token : "", // Only used for huggingface
-    response_id :  JSONResponseHandler.responseId, // standard or regex available
+    response_id :  JsonResponse.responseId, // standard or regex available
     attributes_to_comment : ["reason"], // list of attributes to comment
     comment_string: "//", // Comment string to add
     injection_variable: "{vscode_content}" // variable to inject vscode content in prompt
