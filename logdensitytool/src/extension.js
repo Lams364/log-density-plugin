@@ -13,7 +13,7 @@ const { readFile } = require("./utils/fileReader");
 const { buildPrompt, getSurroundingMethodText, extractAttributesFromPrompt } = require("./utils/modelTools")
 const path = require('path');
 
-const { api_id, url, port, prompt_file, default_model, default_token, response_id, attributes_to_comment, comment_string, injection_variable } = configuration;
+const { api_id, url, port, prompt_file, default_model, default_token, llm_temperature, llm_max_token, response_id, attributes_to_comment, comment_string, injection_variable } = configuration;
 
 let trained = false;
 let remoteUrl; // Store the remote URL if needed
@@ -96,7 +96,7 @@ async function generateLogAdvice() {
             while (linesToInsert.length === 0) {
                 
                 console.log("Generating log advice...");
-                const modelResponse = await apiModelService.generate(model, null, prompt, null, null);
+                const modelResponse = await apiModelService.generate(model, null, prompt, llm_temperature, llm_max_token);
                 if (attributes.length > 0) {
                     linesToInsert = reponseService.extractLines(modelResponse, attributes, attributes_to_comment, comment_string);
                 } else {
@@ -257,7 +257,7 @@ function activate(context) {
         if (token) {
             console.log(`Changing token`)
             const response = await apiModelService.changeToken(token);
-            console.log(JSON.stringify(response, null, 2));
+            //console.log(JSON.stringify(response, null, 2));
             if (response.completed == true) {
                 vscode.window.showInformationMessage('Token Change has been successfull')
             } else {
@@ -270,7 +270,7 @@ function activate(context) {
 
     let getModelInfo = vscode.commands.registerCommand('log-advice-generator.modelInfo', async () => {
         const response = await apiModelService.info();
-        console.log(JSON.stringify(response.model, null))
+        //console.log(JSON.stringify(response.model, null))
         vscode.window.showInformationMessage("Model : " + JSON.stringify(response.model, null))
     });
 

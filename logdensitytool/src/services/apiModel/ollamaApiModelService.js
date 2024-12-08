@@ -12,7 +12,6 @@ class OllamaApiModel extends ApiModel{
 
   constructor(url, port, initialModel, initialToken) {
     super(url, port, initialModel, initialToken);
-    this.init(initialModel, initialToken)
   }
 
   /**
@@ -34,9 +33,7 @@ class OllamaApiModel extends ApiModel{
    */
   async generate(model, system, prompt, temperature, max_token) {
 
-    if (!this.ready) {
-      throw new Error(`${this.constructor.name} is not ready yet. Please wait for initialization to complete.`);
-    }
+    this.checkReady()
 
     try {
       let usedTokens = 128 // (Default: 128, -1 = infinite generation, -2 = fill context)
@@ -55,6 +52,7 @@ class OllamaApiModel extends ApiModel{
               num_predict: usedTokens
           }
       }) 
+      //console.log(CircularJSON.stringify(response.data, null, 2))
       return response.data.response;
     } catch (error) {
       throw error; // Re-throw the error to propagate it upwards
@@ -122,21 +120,10 @@ class OllamaApiModel extends ApiModel{
   /**
    * Updates the token used for authentication or API access.
    * @param {string} token - The new token string.
-   * @returns {String} completed, true if model changed, false if not
+   * @returns {completed: boolean, message: string} completed, true if model changed, false if not
    */
   async changeToken(token) {
     return {completed: false, message: "Not implemented, not used with Ollama"}
-  }
-
-  /**
-   * 
-   * @param {string} model - Model used for initalisation
-   * @param {string} token - Token used for initalisation
-   */
-  async init(model, token) {
-    await this.changeModel(model);
-    this.ready = true
-    console.log(`${this.constructor.name} initialization complete.`)
   }
 
   async load(model) {
